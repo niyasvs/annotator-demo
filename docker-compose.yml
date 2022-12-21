@@ -1,0 +1,41 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    env_file:
+      - ./.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    volumes:
+      - mongo:/data/db
+    ports:
+      - '6000:27017'
+  app:
+    build:
+      context: ./annotator-be/
+      dockerfile: ./Dockerfile
+    env_file:
+      - ./annotator-be/.env
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8005
+    volumes:
+      - .:/app
+    ports:
+      - 8005:8005
+    depends_on:
+      - mongo
+  ui:
+    build:
+      context: ./annotator-fe
+      dockerfile: ./Dockerfile
+    ports:
+      - "5173:5173"
+    # depends_on:
+    #   - app
+
+volumes:
+  mongo:
+  app:
+  # ui:
